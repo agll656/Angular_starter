@@ -5,18 +5,21 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { ProductListComponent } from './products/product-list.component';
 import { ConvertToSpacesPipe } from './shared/convert-to-spaces';
-
+import { StarComponent } from './shared/star.component';
+import {HttpClientModule} from '@angular/common/http';
 // Ngmodule decorator makes this class appmodule class
 @NgModule({
   declarations: [
     AppComponent,
     ProductListComponent,
-    ConvertToSpacesPipe
+    ConvertToSpacesPipe,
+    StarComponent
   ],
   imports: [
     // below is external module that is imported so that our app works well in the browser
     BrowserModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   // bootstrap defines the startup component of our application
   // startup component should contain sekectir we used in the html file

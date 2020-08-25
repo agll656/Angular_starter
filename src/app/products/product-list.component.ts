@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Iproducts } from './product';
-import { newArray } from '@angular/compiler/src/util';
+import { ProductServiceService } from './product-service.service';
+import { Observable, range } from 'rxjs';
+import {map, filter} from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 
 @Component({
     selector: 'pm-products',
     templateUrl: './product-list.component.html',
-    styleUrls: ['./product-list.component.css']
+    styleUrls: ['./product-list.component.css'],
+    providers: [ProductServiceService]
 })
 
 export class ProductListComponent implements OnInit{
@@ -16,92 +20,68 @@ export class ProductListComponent implements OnInit{
     imageWidth: number = 50;
     imageMargin: number = 2;
     showImage: boolean = false;
+    private productURL = 'https://putsreq.com/FI9V0wF60fKAfqoFp83W';
 
     // _listFilter here is to hold the listFilter vALEU
     private _listFilter: string ;
     // when data binding needed, html will call getter to get the value
     get listFilter(){
-      console.log("list filter ran", this._listFilter)
       return this._listFilter;
     }
     // data binding calls the setter to pass the changed valeu
     set listFilter(value: string){
-      console.log("set value ran", value)
       this._listFilter = value;
       this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products ;
     }
 
     filteredProducts: Iproducts[];
-    products: Iproducts[] = [
-        {
-          "productId": 1,
-          "productName": "Leaf Rake",
-          "productCode": "GDN-0011",
-          "releaseDate": "March 19, 2019",
-          "description": "Leaf rake with 48-inch wooden handle.",
-          "price": 19.95,
-          "starRating": 3.2,
-          "imageUrl": "assets/images/leaf_rake.png"
-        },
-        {
-          "productId": 2,
-          "productName": "Garden Cart",
-          "productCode": "GDN-0023",
-          "releaseDate": "March 18, 2019",
-          "description": "15 gallon capacity rolling garden cart",
-          "price": 32.99,
-          "starRating": 4.2,
-          "imageUrl": "assets/images/garden_cart.png"
-        },
-        {
-          "productId": 5,
-          "productName": "Hammer",
-          "productCode": "TBX-0048",
-          "releaseDate": "May 21, 2019",
-          "description": "Curved claw steel hammer",
-          "price": 8.9,
-          "starRating": 4.8,
-          "imageUrl": "assets/images/hammer.png"
-        },
-        {
-          "productId": 8,
-          "productName": "Saw",
-          "productCode": "TBX-0022",
-          "releaseDate": "May 15, 2019",
-          "description": "15-inch steel blade hand saw",
-          "price": 11.55,
-          "starRating": 3.7,
-          "imageUrl": "assets/images/saw.png"
-        },
-        {
-          "productId": 10,
-          "productName": "Video Game Controller",
-          "productCode": "GMG-0042",
-          "releaseDate": "October 15, 2018",
-          "description": "Standard two-button video game controller",
-          "price": 35.95,
-          "starRating": 4.6,
-          "imageUrl": "assets/images/xbox-controller.png"
-        }
-      ];
+    products: Iproducts[];
       toggleImage(): void{
           this.showImage = !this.showImage;
       }
 
-       // constructor is used to ninitalize the value; 
+       // constructor is used to initalize the value; 
   // constructor runs as soon as class loads  
-      constructor(){
-        this.listFilter = 'cart';
-        this.filteredProducts = this.products;
+      constructor(private productService: ProductServiceService, private http: HttpClient){
+
       }
+
+      getProducts(): Observable<Iproducts[]>{
+        return this.http.get<Iproducts[]>(this.productURL);
+        
+      }
+    
+      // ngOninit runs after the constructor 
+      ngOnInit(): void{
+        console.log('In oninit');
+        this.products = this.productService.getProducts();
+        this.listFilter = 'carts';
+        this.filteredProducts = this.products;
+    }
+
+      ratingValueFromChildComponent(message: string){
+        this.pageTitle = 'Product List: ' + message;
+
+      }
+
+      testingOperators(){
+        // this method is to test rxjs operators and not actual feature of this app
+        const source$: Observable<number> = range(0, 10);
+
+        source$.pipe(
+          map(x => x * 3),
+          filter(x => x % 2 === 0)
+
+        ).subscribe(x => console.log(x));
+
+        // this.http.get('https://putsreq.com/FI9V0wF60fKAfqoFp83W').subscribe(data => console.log(data));
+      }
+      // testingOperators();
 
       performFilter(filterBy: string): Iproducts[]{
         filterBy = filterBy.toLocaleLowerCase();
-        console.log("perform Filtr ran", filterBy);
         return this.products.filter((product: Iproducts) => product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
       }
     //  as we are implementing onintit interface, we need to define its method ngOnit
-      ngOnInit(): void{
-          console.log('In oninit');
-      }
+     
 }
